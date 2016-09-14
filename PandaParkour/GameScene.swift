@@ -16,25 +16,26 @@ class GameScene: SKScene {
     
     override func didMove(to view: SKView) {
         
-        // Get label node from scene and store it for use later
-        self.label = self.childNode(withName: "//helloLabel") as? SKLabelNode
-        if let label = self.label {
-            label.alpha = 0.0
-            label.run(SKAction.fadeIn(withDuration: 2.0))
-        }
-        
-        // Create shape node to use during mouse interaction
-        let w = (self.size.width + self.size.height) * 0.05
-        self.spinnyNode = SKShapeNode.init(rectOf: CGSize.init(width: w, height: w), cornerRadius: w * 0.3)
-        
-        if let spinnyNode = self.spinnyNode {
-            spinnyNode.lineWidth = 2.5
-            
-            spinnyNode.run(SKAction.repeatForever(SKAction.rotate(byAngle: CGFloat(M_PI), duration: 1)))
-            spinnyNode.run(SKAction.sequence([SKAction.wait(forDuration: 0.5),
-                                              SKAction.fadeOut(withDuration: 0.5),
-                                              SKAction.removeFromParent()]))
-        }
+        //创建背景
+        let background = SKSpriteNode(color: UIColor(red: 113 / 255.0, green: 197 / 255.0, blue: 207 / 255.0, alpha: 1), size: self.size)
+        background.anchorPoint = CGPoint(x: 0, y: 0)
+        //创建熊猫跑动
+        let panda = Panda(size: CGSize(width: 100, height: 100))
+        panda.position = CGPoint(x: self.frame.midX, y: self.frame.midY + 70)
+        //创建开始游戏按钮
+        let label = SKLabelNode(fontNamed: "Chalkduster")
+        label.name = "button"
+        label.text = "开始游戏"
+        label.fontSize = 50
+        label.position = CGPoint(x: self.frame.midX, y: self.frame.midY - 100)
+        label.run(SKAction.repeatForever(SKAction.sequence([
+            SKAction.scale(to: 1.1, duration: 1),
+            SKAction.scale(to: 1, duration: 1)
+            ])))
+    
+        addChild(background)
+        addChild(panda)
+        addChild(label)
     }
     
     
@@ -63,11 +64,12 @@ class GameScene: SKScene {
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let label = self.label {
-            label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
-        }
+        let button = childNode(withName: "button")
+        button?.run(SKAction.fadeOut(withDuration: 0.5), completion: { 
+            let scene = MainScene(size: self.size)
+            self.view?.presentScene(scene, transition: SKTransition.doorsOpenVertical(withDuration: 0.5))
+        })
         
-        for t in touches { self.touchDown(atPoint: t.location(in: self)) }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
